@@ -10,8 +10,7 @@ const PostCard = ({ post }: any) => {
           <Link href={`#`}>
             <img
               src={
-                "https://github.com/shadcn.png" ||
-                "/assets/icons/profile-placeholder.svg"
+                "https://github.com/shadcn.png" || "/profile-placeholder.svg"
               }
               alt="creator"
               className="w-12 lg:h-12 rounded-full"
@@ -32,12 +31,7 @@ const PostCard = ({ post }: any) => {
         </div>
 
         <Link href={`#`}>
-          <img
-            src={"/assets/icons/edit.svg"}
-            alt="edit"
-            width={20}
-            height={20}
-          />
+          <img src={"/edit.svg"} alt="edit" width={20} height={20} />
         </Link>
       </div>
 
@@ -54,7 +48,7 @@ const PostCard = ({ post }: any) => {
         </div>
 
         <img
-          src={post.imageUrl || "/assets/icons/profile-placeholder.svg"}
+          src={post.imageUrl || "/profile-placeholder.svg"}
           alt="post image"
           className="post-card_img"
         />

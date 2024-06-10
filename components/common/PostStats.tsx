@@ -5,7 +5,7 @@ const PostStats = () => {
     <div className={`flex justify-between items-center z-20 w-full`}>
       <div className="flex gap-2 mr-5">
         <img
-          src={`${"/assets/icons/liked.svg"}`}
+          src={`${"/liked.svg"}`}
           alt="like"
           width={20}
           height={20}
@@ -16,7 +16,7 @@ const PostStats = () => {
 
       <div className="flex gap-2">
         <img
-          src={"/assets/icons/saved.svg"}
+          src={"/saved.svg"}
           alt="share"
           width={20}
           height={20}
