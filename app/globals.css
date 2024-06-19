@@ -126,3 +126,7 @@ body {
   background-color: #09090a;
   color: #fff;
 }
+
+input > p {
+  color: red;
+}

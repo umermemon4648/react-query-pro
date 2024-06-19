@@ -1,5 +1,6 @@
 export enum QUERY_KEYS {
   // POST KEYS
+  ADD_POST = "addPost",
   GET_POSTS = "getPosts",
   GET_INFINITE_POSTS = "getInfinitePosts",
   GET_RECENT_POSTS = "getRecentPosts",

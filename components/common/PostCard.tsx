@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { PostStats } from "@/components/common";
+import { DeleteIcon, Trash2, Trash2Icon } from "lucide-react";
 
 const PostCard = ({ post }: any) => {
   return (
@@ -30,9 +31,12 @@ const PostCard = ({ post }: any) => {
           </div>
         </div>
 
-        <Link href={`#`}>
-          <img src={"/edit.svg"} alt="edit" width={20} height={20} />
-        </Link>
+        <div className="flex justify-between items-center">
+          <Link href={`#`}>
+            <img src={"/edit.svg"} alt="edit" width={20} height={20} />
+          </Link>
+          <Trash2 className="cursor-pointer text-red-500" stroke="#877EFF" />
+        </div>
       </div>
 
       <Link href={`#`}>

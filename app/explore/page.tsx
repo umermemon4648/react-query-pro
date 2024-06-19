@@ -7,6 +7,9 @@ import { Loader, PostCard } from "@/components/common";
 import { postList } from "@/data";
 import { useGetPosts } from "@/lib/react-query/postQueries";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { PostModal } from "@/components/modal/PostModal";
 
 export type SearchResultProps = {
   isSearchFetching: boolean;
@@ -29,6 +32,7 @@ export type SearchResultProps = {
 // };
 
 const Explore = () => {
+  const router = useRouter();
   const { ref, inView } = useInView();
   const [searchValue, setSearchValue] = useState("");
   const { data: posts, isPending, error } = useGetPosts();
@@ -38,8 +42,10 @@ const Explore = () => {
   console.log("isPending.............", isPending);
 
   const debouncedSearch = useDebounce(searchValue, 500);
-  //   const { data: searchedPosts, isFetching: isSearchFetching } =
-  //     useSearchPosts(debouncedSearch);
+
+  const handleMove = () => {
+    router.push("/new");
+  };
 
   useEffect(() => {
     if (inView && !searchValue) {
@@ -82,6 +88,14 @@ const Explore = () => {
       </div>
 
       <div className="home-container">
+        <div className="flex items-center justify-between">
+          <Button onClick={handleMove} variant={"primary"}>
+            Move
+          </Button>
+          <PostModal>
+            <Button variant={"primary"}>Add</Button>
+          </PostModal>
+        </div>
         <div className="home-posts">
           <ul className="flex flex-col flex-1 gap-9 w-full ">
             {isPending
@@ -99,18 +113,6 @@ const Explore = () => {
           </ul>
         </div>
       </div>
-
-      {/* <div className="flex flex-wrap gap-9 w-full max-w-5xl">
-        {posts.map((item, index) => (
-          <GridPostList key={`page-${index}`} posts={item} />
-        ))}
-      </div> */}
-
-      {/* {hasNextPage && !searchValue && (
-        <div ref={ref} className="mt-10">
-          <Loader />
-        </div>
-      )} */}
     </div>
   );
 };
