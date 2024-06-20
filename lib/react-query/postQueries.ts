@@ -18,7 +18,7 @@ export const getPosts = async (page: number) => {
   try {
     console.log("page...........", page);
 
-    const pageSize = 2;
+    const pageSize = 3;
     let queryParams = {
       page,
       pageSize,

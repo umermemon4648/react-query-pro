@@ -1,11 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { Loader, PostCard } from "@/components/common";
 import { postList } from "@/data";
-// import { useGetPosts } from "@/lib/react-query/postQueries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -13,6 +12,7 @@ import { PostModal } from "@/components/modal/PostModal";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/react-query/queryKey";
 import { getPosts } from "@/lib/react-query/postQueries";
+import { Loader2 } from "lucide-react";
 
 export type SearchResultProps = {
   isSearchFetching: boolean;
@@ -21,8 +21,11 @@ export type SearchResultProps = {
 
 const Explore = () => {
   const router = useRouter();
-  const { ref, inView } = useInView();
   const [searchValue, setSearchValue] = useState("");
+  const { ref, inView, entry } = useInView({
+    threshold: 0.8,
+  });
+
   const {
     data: posts,
     isPending,
@@ -35,16 +38,10 @@ const Explore = () => {
     queryFn: ({ pageParam = 1 }) => getPosts(pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage: any, pages) => {
-      console.log("lastPage", lastPage);
-      console.log("pages", pages);
       return pages.length < lastPage.pagesCount ? pages.length + 1 : undefined;
     },
     staleTime: 1000 * 60 * 5,
   });
-
-  console.log("data.............", posts);
-  console.log("erorr.............", error);
-  console.log("isPending.............", isPending);
 
   const debouncedSearch = useDebounce(searchValue, 500);
 
@@ -53,26 +50,13 @@ const Explore = () => {
   };
 
   useEffect(() => {
-    if (inView && !searchValue) {
-      //   fetchNextPage();
+    if (inView) {
+      fetchNextPage();
     }
-  }, [inView, searchValue]);
+  }, [entry, inView]);
 
-  // if (isPending)
-  //   return (
-  //     <div className="flex-center w-full h-full">
-  //       <p className="text-4xl text-white text-bold">
-  //         Loading........................
-  //       </p>
-  //       <Loader width={100} height={100} />
-  //     </div>
-  //   );
-
-  //   const shouldShowSearchResults = searchValue !== "";
-  //   const shouldShowPosts =
-  //     !shouldShowSearchResults &&
-  //     posts.pages.every((item) => item.documents.length === 0);
-
+  const flatArray = posts?.pages.map((val) => val.data);
+  console.log("flatArray", flatArray);
   return (
     <div className="explore-container">
       <div className="explore-inner_container">
@@ -112,28 +96,24 @@ const Explore = () => {
                 ))
               : posts?.pages?.map((page: any, index: number) => (
                   <React.Fragment key={index}>
-                    {page?.data?.map((post: any) => (
-                      <li
-                        key={post?._id}
-                        className="flex justify-center w-full"
-                      >
-                        <PostCard post={post} />
-                      </li>
-                    ))}
+                    {page?.data?.map((post: any, index1: number) => {
+                      return (
+                        <li
+                          key={post?._id}
+                          className="flex justify-center w-full"
+                        >
+                          <PostCard post={post} />
+                        </li>
+                      );
+                    })}
                   </React.Fragment>
                 ))}
-            <button
-              onClick={() => {
-                fetchNextPage();
-              }}
-              disabled={!hasNextPage || isFetchingNextPage}
-            >
-              {isFetchingNextPage
-                ? "Loading more..."
-                : hasNextPage
-                ? "Load More"
-                : "Nothing more to load"}
-            </button>
+
+            {hasNextPage && (
+              <div ref={ref} className="mt-10">
+                <Loader2 />
+              </div>
+            )}
           </ul>
         </div>
       </div>
