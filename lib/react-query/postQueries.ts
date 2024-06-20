@@ -14,13 +14,27 @@ const BASE_URL = "http://localhost:8001";
 // POST QUERIES
 // ============================================================
 
-export const getPosts = async () => {
+export const getPosts = async (page: number) => {
   try {
-    const res = await axios.get(BASE_URL + "/posts");
-    // if (res?.data?.success) {
-    //   successMessage(res?.data?.data?.message);
-    // }
-    return res?.data?.data?.data;
+    console.log("page...........", page);
+
+    const pageSize = 2;
+    let queryParams = {
+      page,
+      pageSize,
+    };
+
+    const res = await axios.get(BASE_URL + "/posts", { params: queryParams });
+    console.log("res", res);
+    if (res?.data?.success) {
+      const pagesCount = Math.ceil(res?.data?.data?.docCount / pageSize);
+
+      return {
+        data: res?.data?.data?.data,
+        pagesCount,
+        docCount: res?.data?.data?.docCount,
+      };
+    }
   } catch (error: any) {
     console.log("eroror", error);
 
@@ -38,14 +52,30 @@ export const addPost = async (values: any) => {
     throw error;
   }
 };
-
-export const useGetPosts = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.GET_POSTS],
-    queryFn: getPosts,
-    staleTime: 1000 * 60 * 5,
-  });
+export const deletePost = async (id: string) => {
+  try {
+    const res = await axios.delete(`${BASE_URL}/post/${id}`);
+    if (res?.data?.success) {
+      return true;
+    }
+  } catch (error) {
+    throw error;
+  }
 };
+// export const useGetPosts = () => {
+//   // return useQuery({
+//   //   queryKey: [QUERY_KEYS.GET_POSTS],
+//   //   queryFn: getPosts,
+//   //   staleTime: 1000 * 60 * 5,
+//   // });
+//   return useInfiniteQuery({
+//     queryKey: [QUERY_KEYS.GET_POSTS],
+//     queryFn: ({ page = 1 }) => getPosts(page),
+//     getNextPageParam: (lastPage, allPages) => {
+//       return lastPage.hasNextPage ? lastPage.hasNextPage : undefined;
+//     },
+//   });
+// };
 
 export const useCreatePost = () => {
   const queryClient = useQueryClient();
@@ -53,6 +83,23 @@ export const useCreatePost = () => {
     mutationFn: (post: any) => addPost(post),
     onSuccess: () => {
       successMessage("Post created successfully!");
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POSTS],
+      });
+    },
+    onError: (error: any) => {
+      console.log("error", error);
+      errorMessage(error?.response?.data?.message || "Error creating post");
+    },
+  });
+};
+
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deletePost(id),
+    onSuccess: () => {
+      successMessage("Post deleted successfully!");
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_POSTS],
       });

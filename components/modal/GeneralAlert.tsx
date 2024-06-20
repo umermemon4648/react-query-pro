@@ -35,15 +35,14 @@ const GeneralAlert = ({
 }: AlertProps) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      {/* <AlertDialogTrigger>Open</AlertDialogTrigger> */}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{desc}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onContinue}>
+          <AlertDialogCancel  >Cancel</AlertDialogCancel>
+          <AlertDialogAction disabled={loading} onClick={onContinue}>
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

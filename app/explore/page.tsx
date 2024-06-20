@@ -1,41 +1,46 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
 import { Loader, PostCard } from "@/components/common";
 import { postList } from "@/data";
-import { useGetPosts } from "@/lib/react-query/postQueries";
+// import { useGetPosts } from "@/lib/react-query/postQueries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { PostModal } from "@/components/modal/PostModal";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { QUERY_KEYS } from "@/lib/react-query/queryKey";
+import { getPosts } from "@/lib/react-query/postQueries";
 
 export type SearchResultProps = {
   isSearchFetching: boolean;
   searchedPosts: any;
 };
 
-// const SearchResults = ({
-//   isSearchFetching,
-//   searchedPosts,
-// }: SearchResultProps) => {
-//   if (isSearchFetching) {
-//     return <Loader />;
-//   } else if (searchedPosts && searchedPosts.documents.length > 0) {
-//     return <GridPostList posts={searchedPosts.documents} />;
-//   } else {
-//     return (
-//       <p className="text-light-4 mt-10 text-center w-full">No results found</p>
-//     );
-//   }
-// };
-
 const Explore = () => {
   const router = useRouter();
   const { ref, inView } = useInView();
   const [searchValue, setSearchValue] = useState("");
-  const { data: posts, isPending, error } = useGetPosts();
+  const {
+    data: posts,
+    isPending,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: [QUERY_KEYS.GET_POSTS],
+    queryFn: ({ pageParam = 1 }) => getPosts(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any, pages) => {
+      console.log("lastPage", lastPage);
+      console.log("pages", pages);
+      return pages.length < lastPage.pagesCount ? pages.length + 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   console.log("data.............", posts);
   console.log("erorr.............", error);
@@ -102,14 +107,33 @@ const Explore = () => {
               ? Array.from({ length: 5 }).map((_, index) => (
                   <Skeleton
                     key={index}
-                    className="bg-[#1F1F22] h-[325px] w-[600px] rounded-xl mr-4"
+                    className="bg-[rgb(31,31,34)] h-[325px] w-[600px] rounded-xl mr-4"
                   />
                 ))
-              : posts?.map((post: any) => (
-                  <li key={post._id} className="flex justify-center w-full">
-                    <PostCard post={post} />
-                  </li>
+              : posts?.pages?.map((page: any, index: number) => (
+                  <React.Fragment key={index}>
+                    {page?.data?.map((post: any) => (
+                      <li
+                        key={post?._id}
+                        className="flex justify-center w-full"
+                      >
+                        <PostCard post={post} />
+                      </li>
+                    ))}
+                  </React.Fragment>
                 ))}
+            <button
+              onClick={() => {
+                fetchNextPage();
+              }}
+              disabled={!hasNextPage || isFetchingNextPage}
+            >
+              {isFetchingNextPage
+                ? "Loading more..."
+                : hasNextPage
+                ? "Load More"
+                : "Nothing more to load"}
+            </button>
           </ul>
         </div>
       </div>
